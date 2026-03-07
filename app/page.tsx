@@ -1,65 +1,90 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import AudioPlayer from '@/components/AudioPlayer';
+
+const PLAYLIST = [
+  { 
+    id: 1, 
+    title: "Tell me baby", 
+    src: "/tell me baby.mp3", 
+    cover: "/jacket.jpg", 
+    album: "Official髭男dism", 
+    duration: "4:41" 
+  },
+  { 
+    id: 2, 
+    title: "ノーダウト", 
+    src: "/ノーダウト.mp3", 
+    cover: "/jacket.jpg", 
+    album: "Official髭男dism", 
+    duration: "3:22" 
+  },
+  { 
+    id: 3, 
+    title: "stand by you", 
+    src: "/stand by you.mp3", 
+    cover: "/jacket.jpg", 
+    album: "Official髭男dism", 
+    duration: "4:16" 
+  },
+];
 
 export default function Home() {
+  const [currentTrack, setCurrentTrack] = useState(PLAYLIST[0]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen bg-[#0a0f14] text-white p-8 pb-32 font-sans">
+      <header className="mb-10 max-w-4xl mx-auto">
+        <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent uppercase">
+          My Music
+        </h1>
+        <p className="text-blue-300/60 text-sm font-medium tracking-widest">
+          {PLAYLIST.length} TRACKS
+        </p>
+      </header>
+
+      <div className="max-w-4xl mx-auto">
+        {/* 見出し */}
+        <div className="grid grid-cols-[24px_1fr_2fr_1fr] gap-4 px-4 py-2 text-blue-200/30 text-[11px] font-bold uppercase tracking-widest border-b border-blue-900/30 mb-4">
+          <div>#</div>
+          <div>Title</div>
+          <div>Album</div>
+          <div className="text-right">Time</div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* 曲リスト */}
+        {PLAYLIST.map((track, index) => (
+          <div 
+            key={track.id}
+            onClick={() => setCurrentTrack(track)}
+            className={`grid grid-cols-[24px_1fr_2fr_1fr] gap-4 px-4 py-4 rounded-lg transition-all duration-300 group items-center cursor-pointer mb-2 border-l-4 ${
+              currentTrack.id === track.id 
+                ? 'bg-blue-600/10 border-blue-400 shadow-[inset_0_0_20px_rgba(59,130,246,0.1)]' 
+                : 'hover:bg-white/5 border-transparent'
+            }`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <div className={currentTrack.id === track.id ? 'text-blue-400 font-bold' : 'text-gray-600'}>
+              {currentTrack.id === track.id ? '●' : index + 1}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className={`font-bold truncate ${currentTrack.id === track.id ? 'text-blue-300' : 'text-white'}`}>
+                {track.title}
+              </span>
+              <span className="text-xs text-blue-200/40">Official髭男dism</span>
+            </div>
+            <div className="text-sm text-blue-100/30 italic truncate">{track.album}</div>
+            <div className="text-right text-sm text-blue-100/30 font-mono">{track.duration}</div>
+          </div>
+        ))}
+      </div>
+
+      <AudioPlayer 
+        key={currentTrack.src} 
+        src={currentTrack.src} 
+        title={currentTrack.title} 
+        cover={currentTrack.cover} 
+      />
+    </main>
   );
 }
