@@ -28,6 +28,22 @@ const PLAYLIST = [
     album: "Official芋男dism", 
     duration: "4:16" 
   },
+  { 
+    id: 4, 
+    title: "異端なスター", 
+    src: "/異端なスター.mp3", 
+    cover: "/jacket.jpg", 
+    album: "Official芋男dism", 
+    duration: "4:28" 
+  },
+  { 
+    id: 5, 
+    title: "犬かキャットかで死ぬまで喧嘩しよう", 
+    src: "/犬かキャットかで死ぬまで喧嘩しよう.mp3", 
+    cover: "/jacket.jpg", 
+    album: "Official芋男dism", 
+    duration: "3:02" 
+  },
 ];
 
 export default function Home() {
