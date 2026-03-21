@@ -9,7 +9,7 @@ const PLAYLIST = [
     title: "Tell me baby", 
     src: "/tell me baby.mp3", 
     cover: "/jacket.jpg", 
-    album: "Official髭男dism", 
+    album: "Official芋男dism", 
     duration: "4:41" 
   },
   { 
@@ -17,7 +17,7 @@ const PLAYLIST = [
     title: "ノーダウト", 
     src: "/ノーダウト.mp3", 
     cover: "/jacket.jpg", 
-    album: "Official髭男dism", 
+    album: "Official芋男dism", 
     duration: "3:22" 
   },
   { 
@@ -25,7 +25,7 @@ const PLAYLIST = [
     title: "stand by you", 
     src: "/stand by you.mp3", 
     cover: "/jacket.jpg", 
-    album: "Official髭男dism", 
+    album: "Official芋男dism", 
     duration: "4:16" 
   },
 ];
@@ -37,7 +37,7 @@ export default function Home() {
     <main className="min-h-screen bg-[#0a0f14] text-white p-8 pb-32 font-sans">
       <header className="mb-10 max-w-4xl mx-auto">
         <h1 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent uppercase">
-          My Music
+          Official芋男dism
         </h1>
         <p className="text-blue-300/60 text-sm font-medium tracking-widest">
           {PLAYLIST.length} TRACKS
@@ -45,7 +45,6 @@ export default function Home() {
       </header>
 
       <div className="max-w-4xl mx-auto">
-        {/* 見出し */}
         <div className="grid grid-cols-[24px_1fr_2fr_1fr] gap-4 px-4 py-2 text-blue-200/30 text-[11px] font-bold uppercase tracking-widest border-b border-blue-900/30 mb-4">
           <div>#</div>
           <div>Title</div>
@@ -53,7 +52,6 @@ export default function Home() {
           <div className="text-right">Time</div>
         </div>
 
-        {/* 曲リスト */}
         {PLAYLIST.map((track, index) => (
           <div 
             key={track.id}
@@ -71,7 +69,7 @@ export default function Home() {
               <span className={`font-bold truncate ${currentTrack.id === track.id ? 'text-blue-300' : 'text-white'}`}>
                 {track.title}
               </span>
-              <span className="text-xs text-blue-200/40">Official髭男dism</span>
+              <span className="text-xs text-blue-200/40">Official芋男dism</span>
             </div>
             <div className="text-sm text-blue-100/30 italic truncate">{track.album}</div>
             <div className="text-right text-sm text-blue-100/30 font-mono">{track.duration}</div>

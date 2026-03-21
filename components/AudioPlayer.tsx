@@ -61,18 +61,16 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
     <div className="fixed bottom-0 left-0 right-0 bg-[#0d131a]/95 backdrop-blur-xl border-t border-blue-900/40 p-4 text-white z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between">
         
-        {/* 左側：曲情報 */}
         <div className="flex items-center gap-4 w-1/3">
           <div className="w-14 h-14 bg-gray-800 rounded shadow-2xl overflow-hidden border border-blue-900/20">
              <img src={cover} alt={title} className="w-full h-full object-cover" />
           </div>
           <div className="min-w-0">
             <div className="text-sm font-bold truncate text-blue-50">{title}</div>
-            <div className="text-[11px] text-blue-300/50 font-bold uppercase tracking-wider">Official髭男dism</div>
+            <div className="text-[11px] text-blue-300/50 font-bold uppercase tracking-wider">Official芋男dism</div>
           </div>
         </div>
 
-        {/* 中央：コントロール */}
         <div className="flex flex-col items-center gap-2 w-1/3">
           <div className="flex items-center gap-8">
             <SkipBack size={22} className="text-blue-200/40 hover:text-blue-300 cursor-pointer transition" />
@@ -85,7 +83,6 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
             <SkipForward size={22} className="text-blue-200/40 hover:text-blue-300 cursor-pointer transition" />
           </div>
           
-          {/* シークバー */}
           <div className="w-full max-w-md flex items-center gap-3 text-[10px] font-mono text-blue-300/40">
             <span>{formatTime(seek)}</span>
             <div 
@@ -101,7 +98,6 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
           </div>
         </div>
 
-        {/* 右側：音量 */}
         <div className="flex justify-end items-center gap-3 w-1/3">
           <Volume2 size={18} className="text-blue-300/40" />
           <div className="w-24 h-[3px] bg-blue-900/30 rounded-full overflow-hidden">
