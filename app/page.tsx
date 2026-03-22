@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AudioPlayer from '@/components/AudioPlayer';
 import { Play, Shuffle } from 'lucide-react';
 
@@ -16,23 +16,25 @@ export default function Home() {
   const [currentTrack, setCurrentTrack] = useState(PLAYLIST[0]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const playNextTrack = () => {
-    const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
-    const nextIndex = (currentIndex + 1) % PLAYLIST.length;
-    setCurrentTrack(PLAYLIST[nextIndex]);
-  };
+  // useCallbackで関数を固定する（これがバグ防止の鍵！）
+  const playNextTrack = useCallback(() => {
+    setCurrentTrack((prev) => {
+      const currentIndex = PLAYLIST.findIndex(t => t.id === prev.id);
+      return PLAYLIST[(currentIndex + 1) % PLAYLIST.length];
+    });
+  }, []);
 
-  const playPrevTrack = () => {
-    const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
-    const prevIndex = (currentIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
-    setCurrentTrack(PLAYLIST[prevIndex]);
-  };
+  const playPrevTrack = useCallback(() => {
+    setCurrentTrack((prev) => {
+      const currentIndex = PLAYLIST.findIndex(t => t.id === prev.id);
+      return PLAYLIST[(currentIndex - 1 + PLAYLIST.length) % PLAYLIST.length];
+    });
+  }, []);
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-hidden">
       <div className={`p-6 pb-40 transition-all duration-500 ${isFullScreen ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
         <div className="max-w-xl mx-auto">
-          {/* ヘッダー部分は省略せずそのまま残してください */}
           <div className="flex flex-col items-center mt-8 mb-10 text-center">
             <div className="w-64 h-64 mb-6 shadow-2xl">
               <img src={currentTrack.cover} className="w-full h-full object-cover rounded-xl" />
@@ -43,12 +45,8 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-10">
-            <button className="flex items-center justify-center gap-2 bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">
-              <Play size={20} fill="#ff3b30" /> 再生
-            </button>
-            <button className="flex items-center justify-center gap-2 bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">
-              <Shuffle size={20} /> シャッフル
-            </button>
+            <button className="bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">再生</button>
+            <button className="bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">シャッフル</button>
           </div>
 
           <div className="space-y-1">
@@ -56,28 +54,21 @@ export default function Home() {
               <div 
                 key={track.id}
                 onClick={() => {
-                  // 同じ曲をタップした時はリセットしないようにする
-                  if (currentTrack.id !== track.id) {
-                    setCurrentTrack(track);
-                  }
-                  setIsFullScreen(true); // タップしたらフルスクリーンへ
+                  if (currentTrack.id !== track.id) setCurrentTrack(track);
+                  setIsFullScreen(true);
                 }}
-                className="flex items-center gap-4 px-2 py-3 border-b border-white/5 active:bg-white/10 cursor-pointer transition"
+                className="flex items-center gap-4 px-2 py-3 border-b border-white/5 active:bg-white/10 cursor-pointer"
               >
                 <div className="w-6 text-gray-500 text-sm">{index + 1}</div>
-                <div className="flex-1 min-w-0">
-                  <div className={`font-medium truncate ${currentTrack.id === track.id ? 'text-[#ff3b30]' : 'text-gray-200'}`}>
-                    {track.title}
-                  </div>
+                <div className="flex-1 min-w-0 font-medium truncate">
+                  {track.title}
                 </div>
-                <div className="text-gray-500 text-xs">•••</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* 重要：keyを削除しました */}
       <AudioPlayer 
         track={currentTrack} 
         isFullScreen={isFullScreen} 
