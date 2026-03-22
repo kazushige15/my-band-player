@@ -3,30 +3,39 @@
 import { useState, useEffect } from 'react';
 // @ts-ignore
 import { Howl } from 'howler';
-import { Play, Pause, SkipForward, SkipBack, MoreHorizontal, MessageSquare, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, MoreHorizontal, MessageSquare, ListMusic, Volume2 } from 'lucide-react';
 
 export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNext, onPrev }: any) {
   const [sound, setSound] = useState<Howl | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.8); // 初期音量を80%に設定
 
   useEffect(() => {
     const newSound = new Howl({
       src: [track.src],
       html5: true,
-      autoplay: true, // 次の曲に切り替わったら自動で再生開始
+      autoplay: true,
+      volume: volume, // 現在の音量を適用
       onplay: () => setIsPlaying(true),
       onpause: () => setIsPlaying(false),
       onend: () => {
         setIsPlaying(false);
-        onNext(); // 曲が終わったら自動で次の曲へ！
+        onNext();
       },
       onload: () => setDuration(newSound.duration()),
     });
     setSound(newSound);
     return () => { newSound.unload(); }; 
-  }, [track.src, onNext]); // onNextを監視対象に追加
+  }, [track.src, onNext]);
+
+  // 音量が変更されたときにHowlの音量を更新する
+  useEffect(() => {
+    if (sound) {
+      sound.volume(volume);
+    }
+  }, [volume, sound]);
 
   useEffect(() => {
     let timer: any;
@@ -40,6 +49,12 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
     e.stopPropagation(); 
     if (!sound) return;
     sound.playing() ? sound.pause() : sound.play();
+  };
+
+  // 音量調節の処理
+  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
   };
 
   const formatTime = (secs: number) => {
@@ -67,7 +82,7 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
         </div>
       )}
 
-      {/* フルスクリーン */}
+      {/* フルスクリーン（Apple Music風） */}
       <div className={`fixed inset-0 bg-[#121212] z-50 transition-transform duration-500 ease-in-out p-8 flex flex-col justify-between ${isFullScreen ? 'translate-y-0' : 'translate-y-full'}`}>
         <div className="flex justify-center">
           <button onClick={() => setIsFullScreen(false)} className="bg-white/10 w-12 h-1.5 rounded-full mb-4 hover:bg-white/30 transition"></button>
@@ -86,6 +101,7 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
             <button className="bg-white/10 p-2 rounded-full"><MoreHorizontal /></button>
           </div>
 
+          {/* 再生位置バー */}
           <div className="space-y-2">
             <div className="h-1.5 bg-white/10 rounded-full relative">
               <div className="absolute h-full bg-white/60 rounded-full" style={{ width: `${(seek / duration) * 100}%` }}></div>
@@ -104,9 +120,24 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
             <button onClick={onNext}><SkipForward size={40} fill="white" /></button>
           </div>
 
+          {/* 音量調節バー（Apple Music風） */}
+          <div className="flex items-center gap-3 px-2">
+            <Volume2 size={16} className="text-white/30" />
+            <input 
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={volume}
+              onChange={handleVolumeChange}
+              className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-white"
+            />
+            <Volume2 size={16} fill="white" className="text-white/30" />
+          </div>
+
           <div className="flex justify-between items-center text-white/30 pb-4">
             <MessageSquare size={20} />
-            <div className="text-[10px] font-bold tracking-widest uppercase text-center">soundcore P40i</div>
+            <div className="text-[10px] font-bold tracking-widest uppercase text-center italic">soundcore P40i</div>
             <ListMusic size={20} />
           </div>
         </div>
