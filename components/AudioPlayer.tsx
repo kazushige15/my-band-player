@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 // @ts-ignore
 import { Howl } from 'howler';
-import { Play, Pause, SkipForward, SkipBack, Volume2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 
 export default function AudioPlayer({ src, title, cover }: { src: string; title: string; cover: string }) {
   const [sound, setSound] = useState<Howl | null>(null);
@@ -19,10 +19,8 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
       onload: () => setDuration(newSound.duration()),
       onplay: () => setIsPlaying(true),
       onpause: () => setIsPlaying(false),
-      onstop: () => setIsPlaying(false),
       onend: () => setIsPlaying(false),
     });
-
     setSound(newSound);
     return () => { newSound.unload(); };
   }, [src]);
@@ -30,9 +28,7 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
   useEffect(() => {
     let timer: any;
     if (isPlaying && sound) {
-      timer = setInterval(() => {
-        setSeek(sound.seek());
-      }, 1000);
+      timer = setInterval(() => setSeek(sound.seek()), 1000);
     }
     return () => clearInterval(timer);
   }, [isPlaying, sound]);
@@ -51,60 +47,37 @@ export default function AudioPlayer({ src, title, cover }: { src: string; title:
     setSeek(newPos);
   };
 
-  const formatTime = (secs: number) => {
-    const minutes = Math.floor(secs / 60) || 0;
-    const seconds = Math.floor(secs % 60) || 0;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-  };
-
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#0d131a]/95 backdrop-blur-xl border-t border-blue-900/40 p-4 text-white z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-        
-        <div className="flex items-center gap-4 w-1/3">
-          <div className="w-14 h-14 bg-gray-800 rounded shadow-2xl overflow-hidden border border-blue-900/20">
-             <img src={cover} alt={title} className="w-full h-full object-cover" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-bold truncate text-blue-50">{title}</div>
-            <div className="text-[11px] text-blue-300/50 font-bold uppercase tracking-wider">Official芋男dism</div>
-          </div>
-        </div>
-
-        <div className="flex flex-col items-center gap-2 w-1/3">
-          <div className="flex items-center gap-8">
-            <SkipBack size={22} className="text-blue-200/40 hover:text-blue-300 cursor-pointer transition" />
-            <button 
-              onClick={togglePlay} 
-              className="bg-[#00a8e1] text-white p-3 rounded-full hover:scale-110 active:scale-95 transition shadow-[0_0_20px_rgba(0,168,225,0.5)]"
-            >
-              {isPlaying ? <Pause size={26} fill="white" /> : <Play size={26} fill="white" className="ml-1" />}
-            </button>
-            <SkipForward size={22} className="text-blue-200/40 hover:text-blue-300 cursor-pointer transition" />
-          </div>
-          
-          <div className="w-full max-w-md flex items-center gap-3 text-[10px] font-mono text-blue-300/40">
-            <span>{formatTime(seek)}</span>
-            <div 
-              onClick={handleSeek}
-              className="flex-1 h-[3px] bg-blue-900/30 rounded-full cursor-pointer relative group"
-            >
-              <div 
-                className="bg-[#00a8e1] group-hover:bg-cyan-400 h-full rounded-full transition-all shadow-[0_0_10px_rgba(0,168,225,0.8)]"
-                style={{ width: `${(seek / duration) * 100}%` }}
-              ></div>
+    <div className="fixed bottom-0 left-0 right-0 bg-[#1c1c1e]/95 backdrop-blur-2xl border-t border-white/5 px-6 py-4 z-50">
+      <div className="max-w-xl mx-auto">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={cover} className="w-12 h-12 rounded-md object-cover" />
+            <div className="min-w-0">
+              <div className="text-sm font-bold truncate">{title}</div>
+              <div className="text-[12px] text-gray-400">Official 芋男 dism</div>
             </div>
-            <span>{formatTime(duration)}</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <SkipBack size={24} fill="white" className="cursor-pointer" />
+            <button onClick={togglePlay} className="hover:scale-110 transition">
+              {isPlaying ? <Pause size={32} fill="white" /> : <Play size={32} fill="white" />}
+            </button>
+            <SkipForward size={24} fill="white" className="cursor-pointer" />
           </div>
         </div>
-
-        <div className="flex justify-end items-center gap-3 w-1/3">
-          <Volume2 size={18} className="text-blue-300/40" />
-          <div className="w-24 h-[3px] bg-blue-900/30 rounded-full overflow-hidden">
-             <div className="bg-blue-400/50 h-full w-[80%]"></div>
-          </div>
+        
+        {/* シークバー (Apple風の細いグレー) */}
+        <div className="relative w-full h-1 bg-white/10 rounded-full cursor-pointer group" onClick={handleSeek}>
+          <div 
+            className="absolute h-full bg-white/40 rounded-full group-hover:bg-white/60 transition-colors"
+            style={{ width: `${(seek / duration) * 100}%` }}
+          ></div>
         </div>
-
+        <div className="flex justify-between mt-1 text-[10px] text-gray-500 font-medium">
+          <span>{Math.floor(seek / 60)}:{(Math.floor(seek % 60)).toString().padStart(2, '0')}</span>
+          <span>{Math.floor(duration / 60)}:{(Math.floor(duration % 60)).toString().padStart(2, '0')}</span>
+        </div>
       </div>
     </div>
   );
