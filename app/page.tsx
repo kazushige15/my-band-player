@@ -5,18 +5,18 @@ import AudioPlayer from '@/components/AudioPlayer';
 import { Play, Shuffle } from 'lucide-react';
 
 const PLAYLIST = [
-  { id: 1, title: "Tell me baby", src: "/tell me baby.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:41" },
-  { id: 2, title: "ノーダウト", src: "/ノーダウト.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "3:22" },
-  { id: 3, title: "stand by you", src: "/stand by you.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:16" },
-  { id: 4, title: "異端なスター", src: "/異端なスター.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:28" },
-  { id: 5, title: "犬かキャットかで死ぬまで喧嘩しよう", src: "/犬かキャットかで死ぬまで喧嘩しよう.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "3:02" },
+  { id: 1, title: "ノーダウト", src: "/ノーダウト.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "3:22" },
+  { id: 2, title: "犬かキャットかで死ぬまで喧嘩しよう", src: "/犬かキャットかで死ぬまで喧嘩しよう.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "3:02" },
+  { id: 3, title: "異端なスター", src: "/異端なスター.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:28" },
+  { id: 4, title: "Tell me baby", src: "/tell me baby.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:41" },
+  { id: 5, title: "stand by you", src: "/stand by you.mp3", cover: "/jacket.jpg", album: "Traveler", duration: "4:16" },
 ];
 
 export default function Home() {
   const [currentTrack, setCurrentTrack] = useState(PLAYLIST[0]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // useCallbackで関数を固定する（これがバグ防止の鍵！）
+  // 次の曲へ進む（ループ対応）
   const playNextTrack = useCallback(() => {
     setCurrentTrack((prev) => {
       const currentIndex = PLAYLIST.findIndex(t => t.id === prev.id);
@@ -24,6 +24,7 @@ export default function Home() {
     });
   }, []);
 
+  // 前の曲へ戻る
   const playPrevTrack = useCallback(() => {
     setCurrentTrack((prev) => {
       const currentIndex = PLAYLIST.findIndex(t => t.id === prev.id);
@@ -33,6 +34,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-hidden">
+      {/* リスト画面 */}
       <div className={`p-6 pb-40 transition-all duration-500 ${isFullScreen ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
         <div className="max-w-xl mx-auto">
           <div className="flex flex-col items-center mt-8 mb-10 text-center">
@@ -45,8 +47,12 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-4 mb-10">
-            <button className="bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">再生</button>
-            <button className="bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">シャッフル</button>
+            <button className="flex items-center justify-center gap-2 bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">
+              <Play size={20} fill="#ff3b30" /> 再生
+            </button>
+            <button className="flex items-center justify-center gap-2 bg-[#2c2c2e] py-3 rounded-xl font-bold text-[#ff3b30]">
+              <Shuffle size={20} /> シャッフル
+            </button>
           </div>
 
           <div className="space-y-1">
@@ -57,18 +63,22 @@ export default function Home() {
                   if (currentTrack.id !== track.id) setCurrentTrack(track);
                   setIsFullScreen(true);
                 }}
-                className="flex items-center gap-4 px-2 py-3 border-b border-white/5 active:bg-white/10 cursor-pointer"
+                className="flex items-center gap-4 px-2 py-3 border-b border-white/5 active:bg-white/10 cursor-pointer transition"
               >
                 <div className="w-6 text-gray-500 text-sm">{index + 1}</div>
-                <div className="flex-1 min-w-0 font-medium truncate">
-                  {track.title}
+                <div className="flex-1 min-w-0">
+                  <div className={`font-medium truncate ${currentTrack.id === track.id ? 'text-[#ff3b30]' : 'text-gray-200'}`}>
+                    {track.title}
+                  </div>
                 </div>
+                <div className="text-gray-500 text-xs">•••</div>
               </div>
             ))}
           </div>
         </div>
       </div>
 
+      {/* プレイヤー本体 */}
       <AudioPlayer 
         track={currentTrack} 
         isFullScreen={isFullScreen} 
