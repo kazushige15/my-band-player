@@ -16,14 +16,12 @@ export default function Home() {
   const [currentTrack, setCurrentTrack] = useState(PLAYLIST[0]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
-  // 次の曲へ進む関数
   const playNextTrack = () => {
     const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
-    const nextIndex = (currentIndex + 1) % PLAYLIST.length; // 最後の曲なら最初に戻る
+    const nextIndex = (currentIndex + 1) % PLAYLIST.length;
     setCurrentTrack(PLAYLIST[nextIndex]);
   };
 
-  // 前の曲へ戻る関数
   const playPrevTrack = () => {
     const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
     const prevIndex = (currentIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
@@ -34,6 +32,7 @@ export default function Home() {
     <main className="min-h-screen bg-black text-white font-sans overflow-hidden">
       <div className={`p-6 pb-40 transition-all duration-500 ${isFullScreen ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
         <div className="max-w-xl mx-auto">
+          {/* ヘッダー部分は省略せずそのまま残してください */}
           <div className="flex flex-col items-center mt-8 mb-10 text-center">
             <div className="w-64 h-64 mb-6 shadow-2xl">
               <img src={currentTrack.cover} className="w-full h-full object-cover rounded-xl" />
@@ -56,7 +55,13 @@ export default function Home() {
             {PLAYLIST.map((track, index) => (
               <div 
                 key={track.id}
-                onClick={() => setCurrentTrack(track)}
+                onClick={() => {
+                  // 同じ曲をタップした時はリセットしないようにする
+                  if (currentTrack.id !== track.id) {
+                    setCurrentTrack(track);
+                  }
+                  setIsFullScreen(true); // タップしたらフルスクリーンへ
+                }}
                 className="flex items-center gap-4 px-2 py-3 border-b border-white/5 active:bg-white/10 cursor-pointer transition"
               >
                 <div className="w-6 text-gray-500 text-sm">{index + 1}</div>
@@ -72,9 +77,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 関数をpropsとして渡す */}
+      {/* 重要：keyを削除しました */}
       <AudioPlayer 
-        key={currentTrack.src} 
         track={currentTrack} 
         isFullScreen={isFullScreen} 
         setIsFullScreen={setIsFullScreen} 
