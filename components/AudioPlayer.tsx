@@ -1,23 +1,22 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 // @ts-ignore
 import { Howl } from 'howler';
-import { Play, Pause, SkipForward, SkipBack, MoreHorizontal, MessageSquare, ListMusic, Volume2 } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, MoreHorizontal, MessageSquare, ListMusic } from 'lucide-react';
 
 export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNext, onPrev }: any) {
   const [sound, setSound] = useState<Howl | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.8); // 初期音量を80%に設定
+  const progressBarRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const newSound = new Howl({
       src: [track.src],
       html5: true,
       autoplay: true,
-      volume: volume, // 現在の音量を適用
       onplay: () => setIsPlaying(true),
       onpause: () => setIsPlaying(false),
       onend: () => {
@@ -30,17 +29,10 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
     return () => { newSound.unload(); }; 
   }, [track.src, onNext]);
 
-  // 音量が変更されたときにHowlの音量を更新する
-  useEffect(() => {
-    if (sound) {
-      sound.volume(volume);
-    }
-  }, [volume, sound]);
-
   useEffect(() => {
     let timer: any;
     if (isPlaying && sound) {
-      timer = setInterval(() => setSeek(sound.seek()), 1000);
+      timer = setInterval(() => setSeek(sound.seek()), 100); // より滑らかに更新
     }
     return () => clearInterval(timer);
   }, [isPlaying, sound]);
@@ -51,10 +43,20 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
     sound.playing() ? sound.pause() : sound.play();
   };
 
-  // 音量調節の処理
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newVolume = parseFloat(e.target.value);
-    setVolume(newVolume);
+  // バーを触って時間を変更する関数
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!sound || !progressBarRef.current) return;
+
+    const rect = progressBarRef.current.getBoundingClientRect();
+    let clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    
+    const x = clientX - rect.left;
+    const width = rect.width;
+    const percent = Math.min(Math.max(x / width, 0), 1); // 0%〜100%の間に収める
+    
+    const newPos = percent * duration;
+    sound.seek(newPos);
+    setSeek(newPos);
   };
 
   const formatTime = (secs: number) => {
@@ -82,7 +84,7 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
         </div>
       )}
 
-      {/* フルスクリーン（Apple Music風） */}
+      {/* フルスクリーン */}
       <div className={`fixed inset-0 bg-[#121212] z-50 transition-transform duration-500 ease-in-out p-8 flex flex-col justify-between ${isFullScreen ? 'translate-y-0' : 'translate-y-full'}`}>
         <div className="flex justify-center">
           <button onClick={() => setIsFullScreen(false)} className="bg-white/10 w-12 h-1.5 rounded-full mb-4 hover:bg-white/30 transition"></button>
@@ -101,10 +103,24 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
             <button className="bg-white/10 p-2 rounded-full"><MoreHorizontal /></button>
           </div>
 
-          {/* 再生位置バー */}
+          {/* 修正：触って動かせるシークバー */}
           <div className="space-y-2">
-            <div className="h-1.5 bg-white/10 rounded-full relative">
-              <div className="absolute h-full bg-white/60 rounded-full" style={{ width: `${(seek / duration) * 100}%` }}></div>
+            <div 
+              ref={progressBarRef}
+              onMouseDown={handleSeek}
+              onTouchStart={handleSeek}
+              className="h-1.5 bg-white/10 rounded-full relative cursor-pointer group"
+            >
+              {/* 背景の反応領域を広げて触りやすく */}
+              <div className="absolute -inset-y-2 inset-x-0 bg-transparent"></div>
+              
+              <div 
+                className="absolute h-full bg-white/60 rounded-full group-hover:bg-white/80 transition-colors"
+                style={{ width: `${(seek / duration) * 100}%` }}
+              >
+                {/* Apple風の丸いツマミ */}
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg scale-0 group-hover:scale-100 transition-transform"></div>
+              </div>
             </div>
             <div className="flex justify-between text-[11px] text-white/30 font-bold">
               <span>{formatTime(seek)}</span>
@@ -113,31 +129,16 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNe
           </div>
 
           <div className="flex items-center justify-between px-4">
-            <button onClick={onPrev}><SkipBack size={40} fill="white" /></button>
-            <button onClick={togglePlay}>
+            <button onClick={onPrev}><SkipBack size={40} fill="white" className="active:scale-90 transition" /></button>
+            <button onClick={togglePlay} className="active:scale-90 transition">
               {isPlaying ? <Pause size={64} fill="white" /> : <Play size={64} fill="white" />}
             </button>
-            <button onClick={onNext}><SkipForward size={40} fill="white" /></button>
-          </div>
-
-          {/* 音量調節バー（Apple Music風） */}
-          <div className="flex items-center gap-3 px-2">
-            <Volume2 size={16} className="text-white/30" />
-            <input 
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={volume}
-              onChange={handleVolumeChange}
-              className="flex-1 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer accent-white"
-            />
-            <Volume2 size={16} fill="white" className="text-white/30" />
+            <button onClick={onNext}><SkipForward size={40} fill="white" className="active:scale-90 transition" /></button>
           </div>
 
           <div className="flex justify-between items-center text-white/30 pb-4">
             <MessageSquare size={20} />
-            <div className="text-[10px] font-bold tracking-widest uppercase text-center italic">soundcore P40i</div>
+            <div className="text-[10px] font-bold tracking-widest uppercase text-center">soundcore P40i</div>
             <ListMusic size={20} />
           </div>
         </div>
