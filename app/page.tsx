@@ -16,6 +16,20 @@ export default function Home() {
   const [currentTrack, setCurrentTrack] = useState(PLAYLIST[0]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  // 次の曲へ進む関数
+  const playNextTrack = () => {
+    const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
+    const nextIndex = (currentIndex + 1) % PLAYLIST.length; // 最後の曲なら最初に戻る
+    setCurrentTrack(PLAYLIST[nextIndex]);
+  };
+
+  // 前の曲へ戻る関数
+  const playPrevTrack = () => {
+    const currentIndex = PLAYLIST.findIndex(track => track.id === currentTrack.id);
+    const prevIndex = (currentIndex - 1 + PLAYLIST.length) % PLAYLIST.length;
+    setCurrentTrack(PLAYLIST[prevIndex]);
+  };
+
   return (
     <main className="min-h-screen bg-black text-white font-sans overflow-hidden">
       <div className={`p-6 pb-40 transition-all duration-500 ${isFullScreen ? 'opacity-0 scale-95 pointer-events-none' : 'opacity-100 scale-100'}`}>
@@ -58,11 +72,14 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 関数をpropsとして渡す */}
       <AudioPlayer 
         key={currentTrack.src} 
         track={currentTrack} 
         isFullScreen={isFullScreen} 
         setIsFullScreen={setIsFullScreen} 
+        onNext={playNextTrack}
+        onPrev={playPrevTrack}
       />
     </main>
   );

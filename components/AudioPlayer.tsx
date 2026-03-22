@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Howl } from 'howler';
 import { Play, Pause, SkipForward, SkipBack, MoreHorizontal, MessageSquare, ListMusic } from 'lucide-react';
 
-export default function AudioPlayer({ track, isFullScreen, setIsFullScreen }: any) {
+export default function AudioPlayer({ track, isFullScreen, setIsFullScreen, onNext, onPrev }: any) {
   const [sound, setSound] = useState<Howl | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [seek, setSeek] = useState(0);
@@ -15,15 +15,18 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen }: an
     const newSound = new Howl({
       src: [track.src],
       html5: true,
+      autoplay: true, // 次の曲に切り替わったら自動で再生開始
       onplay: () => setIsPlaying(true),
       onpause: () => setIsPlaying(false),
-      onend: () => setIsPlaying(false),
+      onend: () => {
+        setIsPlaying(false);
+        onNext(); // 曲が終わったら自動で次の曲へ！
+      },
       onload: () => setDuration(newSound.duration()),
     });
     setSound(newSound);
-    // TypeScriptエラー回避のため波括弧で囲む修正
     return () => { newSound.unload(); }; 
-  }, [track.src]);
+  }, [track.src, onNext]); // onNextを監視対象に追加
 
   useEffect(() => {
     let timer: any;
@@ -59,14 +62,13 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen }: an
           </div>
           <div className="flex items-center gap-4 px-2">
             <button onClick={togglePlay}>{isPlaying ? <Pause fill="white" /> : <Play fill="white" />}</button>
-            <SkipForward fill="white" size={20} />
+            <button onClick={(e) => { e.stopPropagation(); onNext(); }}><SkipForward fill="white" size={20} /></button>
           </div>
         </div>
       )}
 
-      {/* フルスクリーン再生画面（Apple Music風） */}
+      {/* フルスクリーン */}
       <div className={`fixed inset-0 bg-[#121212] z-50 transition-transform duration-500 ease-in-out p-8 flex flex-col justify-between ${isFullScreen ? 'translate-y-0' : 'translate-y-full'}`}>
-        
         <div className="flex justify-center">
           <button onClick={() => setIsFullScreen(false)} className="bg-white/10 w-12 h-1.5 rounded-full mb-4 hover:bg-white/30 transition"></button>
         </div>
@@ -95,11 +97,11 @@ export default function AudioPlayer({ track, isFullScreen, setIsFullScreen }: an
           </div>
 
           <div className="flex items-center justify-between px-4">
-            <SkipBack size={40} fill="white" />
+            <button onClick={onPrev}><SkipBack size={40} fill="white" /></button>
             <button onClick={togglePlay}>
               {isPlaying ? <Pause size={64} fill="white" /> : <Play size={64} fill="white" />}
             </button>
-            <SkipForward size={40} fill="white" />
+            <button onClick={onNext}><SkipForward size={40} fill="white" /></button>
           </div>
 
           <div className="flex justify-between items-center text-white/30 pb-4">
